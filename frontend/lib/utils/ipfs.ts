@@ -1,10 +1,26 @@
 // IPFS metadata fetching utilities
 
-const IPFS_GATEWAYS = [
-  'https://gateway.pinata.cloud/ipfs/',
-  'https://ipfs.io/ipfs/',
-  'https://cloudflare-ipfs.com/ipfs/',
-]
+// Get Pinata dedicated gateway if configured
+function getPinataGatewayUrl(): string | null {
+  const gateway = process.env.NEXT_PUBLIC_PINATA_GATEWAY
+  if (!gateway) return null
+  const normalized = gateway.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+  return `https://${normalized}/ipfs/`
+}
+
+// Get list of IPFS gateways, with dedicated gateway first if configured
+function getIpfsGateways(): string[] {
+  const gateways: string[] = []
+  const dedicated = getPinataGatewayUrl()
+  if (dedicated) gateways.push(dedicated)
+  gateways.push(
+    'https://gateway.pinata.cloud/ipfs/',
+    'https://dweb.link/ipfs/',
+    'https://cloudflare-ipfs.com/ipfs/',
+    'https://ipfs.io/ipfs/'
+  )
+  return gateways
+}
 
 // In-memory cache with TTL (5 minutes)
 const CACHE_TTL = 5 * 60 * 1000
@@ -39,15 +55,17 @@ export function ipfsToHttp(uri: string): string {
     return uri
   }
 
+  const gateways = getIpfsGateways()
+
   // Handle ipfs:// protocol
   if (uri.startsWith('ipfs://')) {
     const hash = uri.slice(7)
-    return `${IPFS_GATEWAYS[0]}${hash}`
+    return `${gateways[0]}${hash}`
   }
 
   // Handle raw CID
   if (uri.startsWith('Qm') || uri.startsWith('baf')) {
-    return `${IPFS_GATEWAYS[0]}${uri}`
+    return `${gateways[0]}${uri}`
   }
 
   return uri
@@ -83,8 +101,9 @@ export async function fetchMetadata<T = Record<string, unknown>>(
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeout)
 
-    // Try each gateway
-    for (const gateway of IPFS_GATEWAYS) {
+    // Try each gateway (dedicated first if configured)
+    const gateways = getIpfsGateways()
+    for (const gateway of gateways) {
       try {
         let url: string
 

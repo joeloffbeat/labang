@@ -53,7 +53,7 @@ export async function fetchIPFSMetadata(uri: string): Promise<NFTMetadata | null
     try {
       const url = ipfsToHttp(uri, i)
       const response = await fetch(url, {
-        signal: AbortSignal.timeout(10000), // 10 second timeout
+        signal: AbortSignal.timeout(15000), // 15 second timeout
       })
       
       if (!response.ok) continue

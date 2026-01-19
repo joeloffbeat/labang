@@ -133,6 +133,8 @@ export const OPTIONAL_CLIENT_ENV_VARS = [
   'NEXT_PUBLIC_TENDERLY_PROJECT_SLUG',
   // Thirdweb auth layer (required for x402 protocol)
   'NEXT_PUBLIC_THIRDWEB_CLIENT_ID',
+  // Pinata dedicated gateway for faster IPFS access
+  'NEXT_PUBLIC_PINATA_GATEWAY',
 ] as const
 
 // No required server vars currently - all are optional
@@ -144,6 +146,7 @@ export const OPTIONAL_SERVER_ENV_VARS = [
   'DISABLE_AI_SUMMARIES',
   'TENDERLY_ACCESS_TOKEN',
   'PINATA_JWT',
+  'PINATA_GATEWAY_KEY',
   'DATABASE_URL',
   'MONGODB_URI',
   'NEXTAUTH_SECRET',
